@@ -6,9 +6,9 @@ import { readState, writeState, upsertTask, getActiveTask } from '../core/state.
 import { parseSpec } from '../core/spec.js'
 import { removeWorktree, mergeBranch, deleteBranch } from '../git/worktree.js'
 import { getDiffStats } from '../git/diff.js'
-import { selectCompletionMethod } from '../ui/prompts.js'
+import { selectCompletionMethod, confirmShip } from '../ui/prompts.js'
 import { withSpinner } from '../ui/spinner.js'
-import { success, blank, fatal, info, divider } from '../ui/output.js'
+import { success, blank, fatal, info, divider, warn } from '../ui/output.js'
 import { moveFile } from '../utils/fs.js'
 import chalk from 'chalk'
 
@@ -40,7 +40,39 @@ export async function runTaskDone(): Promise<void> {
     // diff stats are best-effort
   }
 
-  blank()
+  // Review checkpoint
+  if (task.status === 'active') {
+    fatal(
+      'This task has never been reviewed.\n' +
+        'Run: agentstation task review'
+    )
+  }
+
+  const summary = task.review_summary
+  if (summary && summary.missing > 0) {
+    blank()
+    console.log(chalk.red.bold('Last review had missing criteria:'))
+    for (const c of summary.criteria.filter((c) => c.status === 'missing')) {
+      info(chalk.red(`❌  ${c.text}`))
+    }
+    for (const c of summary.criteria.filter((c) => c.status === 'partial')) {
+      info(chalk.yellow(`⚠️   ${c.text}`))
+    }
+    blank()
+    const ship = await confirmShip('Ship anyway? [y/N]')
+    if (!ship) process.exit(0)
+    blank()
+  } else if (summary && summary.partial > 0) {
+    blank()
+    warn('Last review had partial criteria:')
+    for (const c of summary.criteria.filter((c) => c.status === 'partial')) {
+      info(chalk.yellow(`⚠️   ${c.text}`))
+    }
+    blank()
+    const ship = await confirmShip('Ship anyway? [y/N]')
+    if (!ship) process.exit(0)
+    blank()
+  }
 
   const method = await selectCompletionMethod()
 
