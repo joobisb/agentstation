@@ -31,12 +31,18 @@ $ARGUMENTS
 **If the developer wants to start working** (`start`):
 - Check if there's a draft task. If multiple, ask which one.
 - Run `agentstation task start --agent=claude` (or their preferred agent)
-- Remind them the agent will open in an isolated git worktree with the spec injected as context
+- The agent opens in an isolated git worktree with the spec injected as CLAUDE.md
+- If there is already an active task, `task start` will ask if you want to reopen the agent in the existing worktree — say yes to continue working, no to exit
 
 **If the developer wants to review** (`review`):
 - Run `agentstation task review`
-- Interpret the ✅ / ⚠️ / ❌ output for them — explain what was built, what's partial, what's missing
-- If criteria are missing, suggest going back to the agent to complete them before running `task done`
+- Before the diff runs, agentstation checks for uncommitted files in the worktree. If found, the developer is shown three options:
+  1. **Commit and review** — commits the agent's work then runs the coverage report. Use this when the agent finished but forgot to commit.
+  2. **Reopen the agent** — opens Claude in the worktree so the developer can make more changes. The developer runs `task review` again manually when done.
+  3. **Skip** — runs review against what's already committed. Uncommitted changes are not lost and can be committed later.
+- After the diff runs, interpret the ✅ / ⚠️ / ❌ output for them — explain what was built, what's partial, what's missing
+- If criteria are missing, the developer can either reopen the agent (`task start`) or accept the state and proceed to `task done`
+- `task review` is always re-runnable — the task stays open until the developer explicitly runs `task done`
 
 **If the developer wants to ship** (`done`):
 - Run `agentstation task done`
