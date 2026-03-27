@@ -2,6 +2,14 @@ import { readJson, atomicWriteJson } from '../utils/fs.js'
 
 export type TaskStatus = 'draft' | 'active' | 'review' | 'done'
 
+export interface ReviewSummary {
+  found: number
+  partial: number
+  missing: number
+  total: number
+  criteria: Array<{ text: string; status: 'found' | 'partial' | 'missing' }>
+}
+
 export interface TaskRecord {
   id: string
   title: string
@@ -13,6 +21,7 @@ export interface TaskRecord {
   started: string | null
   reviewed: string | null
   done: string | null
+  review_summary: ReviewSummary | null
 }
 
 export interface WorkspaceState {

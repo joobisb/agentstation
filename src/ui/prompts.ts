@@ -136,3 +136,15 @@ export async function confirmAction(message: string): Promise<boolean> {
   ])
   return confirmed
 }
+
+export async function confirmShip(message: string): Promise<boolean> {
+  const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>([
+    {
+      type: 'confirm',
+      name: 'confirmed',
+      message,
+      default: false,
+    },
+  ])
+  return confirmed
+}

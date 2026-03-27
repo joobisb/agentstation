@@ -68,8 +68,16 @@ export async function runTaskReview(): Promise<void> {
   // Print review report
   console.log(formatReview(result))
 
-  // Update task status → review
-  const updated = { ...task, status: 'review' as const, reviewed: new Date().toISOString() }
+  // Update task status → review (persist summary for task done checkpoint)
+  const updated = {
+    ...task,
+    status: 'review' as const,
+    reviewed: new Date().toISOString(),
+    review_summary: {
+      ...result.summary,
+      criteria: result.criteria.map((c) => ({ text: c.criterion.text, status: c.status })),
+    },
+  }
   await writeState(workspace.stateFile, upsertTask(state, updated))
   await updateSpecFrontmatter(task.spec_path, { status: 'review' })
 
