@@ -142,3 +142,7 @@ that also done
 ✖ Deleting task branch
 
 Error: error: Cannot delete branch 'task/enforce-review-checkpoint-in-task-done' checked out at '/Users/joobi/sandbox/nexus/.agentstation/worktrees/enforce-review-checkpoint-in-task-done'
+
+---
+
+yes
