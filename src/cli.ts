@@ -4,6 +4,7 @@ import { runTaskNew } from './commands/task-new.js'
 import { runTaskStart } from './commands/task-start.js'
 import { runTaskReview } from './commands/task-review.js'
 import { runTaskDone } from './commands/task-done.js'
+import { runTaskList } from './commands/task-list.js'
 import { fatal } from './ui/output.js'
 
 program
@@ -36,6 +37,11 @@ task
   .command('review')
   .description('Analyze spec coverage against the current git diff')
   .action(wrap(runTaskReview))
+
+task
+  .command('list')
+  .description('List all active tasks')
+  .action(wrap(runTaskList))
 
 task
   .command('done')
