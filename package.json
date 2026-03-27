@@ -1,0 +1,45 @@
+{
+  "name": "agentstation",
+  "version": "0.1.0",
+  "description": "Spec-first task lifecycle for AI-assisted development",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "agentstation": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "cli",
+    "developer-tools",
+    "task-management",
+    "claude",
+    "openspec"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "gray-matter": "^4.0.3",
+    "inquirer": "^9.3.7",
+    "nanoid": "^5.0.7",
+    "ora": "^8.1.1",
+    "simple-git": "^3.27.0",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0"
+  }
+}

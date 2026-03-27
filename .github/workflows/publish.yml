@@ -1,0 +1,95 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      major:
+        description: 'Major version'
+        required: true
+        default: '0'
+        type: string
+      minor:
+        description: 'Minor version'
+        required: true
+        default: '1'
+        type: string
+      patch:
+        description: 'Patch version'
+        required: true
+        default: '0'
+        type: string
+
+jobs:
+  publish:
+    name: Publish v${{ inputs.major }}.${{ inputs.minor }}.${{ inputs.patch }}
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Set version
+        id: version
+        run: |
+          NEW_VERSION="${{ inputs.major }}.${{ inputs.minor }}.${{ inputs.patch }}"
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "new=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "current=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Validate version is newer
+        run: |
+          node -e "
+            const semver = (v) => v.split('.').map(Number);
+            const [ma, mi, pa] = semver('${{ steps.version.outputs.new }}');
+            const [cma, cmi, cpa] = semver('${{ steps.version.outputs.current }}');
+            const isNewer = ma > cma || (ma === cma && mi > cmi) || (ma === cma && mi === cmi && pa > cpa);
+            if (!isNewer) {
+              console.error('New version (' + ma+'.'+mi+'.'+pa + ') must be greater than current (' + cma+'.'+cmi+'.'+cpa + ')');
+              process.exit(1);
+            }
+            console.log('Version bump: ' + '${{ steps.version.outputs.current }}' + ' → ' + '${{ steps.version.outputs.new }}');
+          "
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version in package.json
+        run: npm version ${{ steps.version.outputs.new }} --no-git-tag-version
+
+      - name: Commit and tag
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore: release v${{ steps.version.outputs.new }}"
+          git tag "v${{ steps.version.outputs.new }}"
+          git push origin main
+          git push origin "v${{ steps.version.outputs.new }}"
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## Published agentstation@${{ steps.version.outputs.new }} 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm:** https://www.npmjs.com/package/agentstation/v/${{ steps.version.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **install:** \`npm install -g agentstation@${{ steps.version.outputs.new }}\`" >> $GITHUB_STEP_SUMMARY
