@@ -1,0 +1,45 @@
+@docs/ideation.md this is what we are going to do, so for v0 version lets focus on that and build a detailed plan and give me what it will look like for the end user as well
+
+---
+
+lets publish
+
+---
+
+yes loggedin
+
+---
+
+i want to add a github action to publish to npm, the gh acation should be trigered only when i manually trigger it and it always should be on the main branch, it should accept major minor and patch, with current major minor and patch prepulated
+
+---
+
+ok create a repo, the repo name should be agentstation itself repo should be undermy githubuser joobisb it should be public as well and push the commit for all changes till now
+
+---
+
+ignore docs as well for now, add it to gitignore
+
+---
+
+make main the default branch
+
+---
+
+add a README especially from the users point of view, the developer will be the user here, from the initial sentence itself they should understand what this is, and then provide how to use it and other details, do not overcomplicate it
+
+---
+
+update the about section of the repo
+
+---
+
+from now on lets use agentstation to build agentstation, add this as a skill to claude globally, lets create a skill to use agentstation first,
+
+---
+
+now create a skill directory inside the repo and copy this skill.md so we publish it to the repo as well so people can use it
+
+---
+
+i meant to craete a skill directory and add SKILL.md into that not to the root path, if commited reevert the last commit and do as I said
