@@ -10,7 +10,7 @@ import { fatal } from './ui/output.js'
 program
   .name('agentstation')
   .description('Spec-first task lifecycle for AI-assisted development')
-  .version('0.2.0')
+  .version('0.3.0')
 
 // ── agentstation init ────────────────────────────────────────────
 program

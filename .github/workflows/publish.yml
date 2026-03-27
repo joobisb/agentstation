@@ -11,7 +11,7 @@ on:
       minor:
         description: 'Minor version'
         required: true
-        default: '2'
+        default: '3'
         type: string
       patch:
         description: 'Patch version'

@@ -1,6 +1,6 @@
 {
   "name": "agentstation",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Spec-first task lifecycle for AI-assisted development",
   "type": "module",
   "engines": {
