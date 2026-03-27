@@ -83,6 +83,48 @@ export async function selectCompletionMethod(): Promise<'pr' | 'merge'> {
   return method
 }
 
+export type UncommittedAction = 'commit' | 'reopen' | 'skip'
+
+export async function selectUncommittedAction(files: string[]): Promise<UncommittedAction> {
+  const fileList = files.map((f) => `  ${f}`).join('\n')
+  console.log(`\nThe agent left ${files.length} uncommitted file(s) in the worktree:\n${fileList}\n`)
+
+  const { action } = await inquirer.prompt<{ action: UncommittedAction }>([
+    {
+      type: 'list',
+      name: 'action',
+      message: 'What would you like to do?',
+      choices: [
+        {
+          name: 'Commit and review — Save the agent\'s work and run the coverage report against it. Choose this if the agent finished but forgot to commit.',
+          value: 'commit',
+        },
+        {
+          name: 'Reopen the agent — Open Claude in the worktree so you can review or make more changes. Run \'agentstation task review\' again when you\'re done.',
+          value: 'reopen',
+        },
+        {
+          name: 'Skip — Run the review against what\'s already committed. The uncommitted changes won\'t appear in the report, but nothing is lost — you can commit later and re-run \'task review\'.',
+          value: 'skip',
+        },
+      ],
+    },
+  ])
+  return action
+}
+
+export async function confirmReopenAgent(taskTitle: string): Promise<boolean> {
+  const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>([
+    {
+      type: 'confirm',
+      name: 'confirmed',
+      message: `"${taskTitle}" is already active with an open worktree. Reopen the agent to continue working on it?`,
+      default: true,
+    },
+  ])
+  return confirmed
+}
+
 export async function confirmAction(message: string): Promise<boolean> {
   const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>([
     {

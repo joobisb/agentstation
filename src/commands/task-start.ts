@@ -4,7 +4,7 @@ import { parseSpec, updateSpecFrontmatter } from '../core/spec.js'
 import { getBranchName, getWorktreePath } from '../core/task.js'
 import { createWorktree } from '../git/worktree.js'
 import { getAdapter } from '../agents/index.js'
-import { selectAgent, selectTask } from '../ui/prompts.js'
+import { selectAgent, selectTask, confirmReopenAgent } from '../ui/prompts.js'
 import { withSpinner } from '../ui/spinner.js'
 import { success, warn, blank, fatal, info, divider, muted } from '../ui/output.js'
 import { which } from '../utils/which.js'
@@ -19,13 +19,31 @@ export async function runTaskStart(opts: TaskStartOptions): Promise<void> {
   const workspace = await requireWorkspace(process.cwd())
   const state = await readState(workspace.stateFile)
 
-  // Warn if there's already an active task
+  // If there's already an active task, offer to reopen the agent in its worktree
   const active = getActiveTask(state)
   if (active) {
-    warn(`There is already an active task: "${active.title}"`)
-    warn('Complete or review it before starting another.')
+    const reopen = await confirmReopenAgent(active.title)
+    if (!reopen) process.exit(0)
+
+    const spec = await parseSpec(active.spec_path)
+    const agentName = opts.agent ?? spec.frontmatter.agent ?? 'claude'
+    const adapter = getAdapter(agentName)
+
     blank()
-    process.exit(1)
+    console.log(chalk.bold(`Reopening ${adapter.displayName} for: ${active.title}`))
+    divider()
+    blank()
+
+    await adapter.inject(active.worktree_path!, spec)
+    await adapter.launch(active.worktree_path!)
+
+    blank()
+    divider()
+    console.log(chalk.gray('Agent session ended.'))
+    blank()
+    muted(`Next: agentstation task review`)
+    blank()
+    return
   }
 
   // Find the task to start

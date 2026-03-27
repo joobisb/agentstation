@@ -69,6 +69,18 @@ export async function deleteBranch(repoRoot: string, branchName: string): Promis
   await git.deleteLocalBranch(branchName, true)
 }
 
+export async function getUncommittedFiles(worktreePath: string): Promise<string[]> {
+  const git = simpleGit(worktreePath)
+  const status = await git.status()
+  return status.files.map((f) => f.path)
+}
+
+export async function commitAllInWorktree(worktreePath: string, message: string): Promise<void> {
+  const git = simpleGit(worktreePath)
+  await git.add('.')
+  await git.commit(message)
+}
+
 export async function mergeBranch(
   repoRoot: string,
   branchName: string,
