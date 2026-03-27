@@ -151,25 +151,6 @@ your-repo/
 
 ---
 
-## Claude Code skill
-
-If you use Claude Code, a `/agentstation` skill is included in this repo. Install it globally:
-
-```bash
-cp -r .claude/skills/agentstation ~/.claude/skills/agentstation
-```
-
-Then from any project:
-
-```
-/agentstation new "Add dark mode"   → create a task
-/agentstation start                 → start working with claude
-/agentstation review                → review what was built
-/agentstation done                  → ship it
-```
-
----
-
 ## Requirements
 
 - Git
