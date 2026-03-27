@@ -80,8 +80,13 @@ export async function runTaskDone(): Promise<void> {
 
   if (method === 'pr') {
     await createPR(workspace, { ...task, branch: task.branch! }, state.base_branch)
+    if (task.worktree_path) {
+      await withSpinner('Removing worktree', () =>
+        removeWorktree(workspace.gitRoot, task.worktree_path!)
+      )
+    }
   } else {
-    await mergeDirect(workspace, { branch: task.branch! }, state.base_branch)
+    await mergeDirect(workspace, { branch: task.branch!, worktree_path: task.worktree_path }, state.base_branch)
   }
 
   // Archive spec: move from openspec/tasks/ → openspec/changes/
@@ -89,11 +94,6 @@ export async function runTaskDone(): Promise<void> {
   const archivePath = join(workspace.changesDir, specFilename)
 
   await withSpinner('Archiving spec', () => moveFile(task.spec_path, archivePath))
-
-  // Remove worktree
-  await withSpinner('Removing worktree', () =>
-    removeWorktree(workspace.gitRoot, task.worktree_path!)
-  )
 
   // Update task state
   const updated = {
@@ -145,12 +145,18 @@ async function createPR(
 
 async function mergeDirect(
   workspace: { gitRoot: string },
-  task: { branch: string },
+  task: { branch: string; worktree_path: string | null },
   baseBranch: string
 ): Promise<void> {
   await withSpinner(`Merging ${task.branch} → ${baseBranch}`, () =>
     mergeBranch(workspace.gitRoot, task.branch, baseBranch)
   )
+  // Remove worktree before deleting branch — branch can't be deleted while checked out
+  if (task.worktree_path) {
+    await withSpinner('Removing worktree', () =>
+      removeWorktree(workspace.gitRoot, task.worktree_path!)
+    )
+  }
   await withSpinner('Deleting task branch', () =>
     deleteBranch(workspace.gitRoot, task.branch)
   )
